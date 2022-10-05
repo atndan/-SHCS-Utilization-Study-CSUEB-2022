@@ -1,0 +1,272 @@
+---
+title: "EDA"
+format: html
+editor: visual
+---
+
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(readxl)
+library(ggplot2)
+library(patchwork)
+library(lubridate)
+library(plotly)
+```
+
+## **Data Wrangling**
+
+```{r}
+df <- read_excel("QI Data Crunching.xlsx")
+df$`ApptDate` <- as.Date(df$`ApptDate`)
+df
+```
+
+```{r}
+nursing <- df %>%
+  filter(DepartmentName == "NURSING")
+nursing
+
+```
+
+```{r}
+counselling <- df %>%
+  filter(DepartmentName == "COUNSELING")
+counselling
+```
+
+```{r}
+primary_care <- df %>%
+  filter(DepartmentName == "PRIMARY CARE")
+primary_care
+```
+
+## EDA
+
+1.  **Total Visit** **Counselling**
+
+```{r}
+date1 <- counselling$ApptDate
+visit <- counselling$Checkins
+fig <- plot_ly(counselling, type = 'scatter', mode = 'lines')%>%
+  add_trace(x = ~date1, y = ~visit, name = 'visit')%>%
+  layout(showlegend = F)
+options(warn = -1)
+
+fig <- fig %>%
+  layout(
+         xaxis = list(zerolinecolor = '#ffff',
+                      zerolinewidth = 2,
+                      gridcolor = 'ffff'),
+         yaxis = list(zerolinecolor = '#ffff',
+                      zerolinewidth = 2,
+                      gridcolor = 'ffff'),
+         plot_bgcolor='#e5ecf6', width = 900)
+
+
+fig
+```
+
+```{r fig.height = 5, fig.width = 10}
+
+p <- ggplot(counselling, aes(x = ApptDate, y = Checkins)) +
+  geom_line(color="#69b3a2")  + 
+  geom_point() +
+  ggtitle("total visit Counselling") + ylab(" ") + xlab(" ")
+
+ggplotly(p)
+```
+
+```{r fig.height = 4, fig.width = 10}
+
+```
+
+```{r}
+af1 <- data.frame(x = counselling$ApptDate[25:52], y = counselling$Checkins[25:52])
+af2 <- data.frame(x = c("2021-08-01", "2021-11-01", "2022-01-01", "2022-03-01", "2022-04-01",  "2022-05-01"), y = c(169, 335, 211, 420, 387, 278))
+af2$x <- as.Date(af2$x)
+```
+
+```{r fig.height = 4, fig.width = 10}
+#rdata1_m <- rdata1[1:36, ]
+lbls <- paste0(lubridate::year(primary_care$ApptDate), " ",
+               month.abb[month(primary_care$ApptDate)])
+brks <- counselling$ApptDate
+ggplot(counselling, aes(x=ApptDate, y=Checkins)) +geom_line(color="#69b3a2") +
+    geom_point(color="#69b3a2") + 
+    geom_point(data = af1, aes(x = x, y = y), color = "red" ) +
+    geom_point(data = af2, aes(x = x, y = y), color = "blue" ) +
+    scale_x_date(labels = lbls,breaks = brks) +
+    theme(axis.text.x = element_text(angle = 45,  hjust = 1, vjust=1, size = 6),
+        axis.text.y = element_text(size = 6),
+        plot.title = element_text(size = 10),
+        panel.grid.minor = element_blank(),
+        legend.position='none') +
+    ggtitle("Counselling Visits per Month") + ylab(" ") + xlab(" ")
+```
+
+2.  **Total visit Primary Care**
+
+```{r fig.height = 4, fig.width = 10}
+ggplot(primary_care, aes(x = ApptDate, y = Checkins)) +
+  geom_line(color="#69b3a2")  + 
+  geom_point() +
+  ggtitle("total visit Primary care") 
+
+```
+
+```{r fig.height = 4, fig.width = 10}
+lbls <- paste0(lubridate::year(primary_care$ApptDate), " ",month.abb[month(primary_care$ApptDate)])
+brks <- nursing$ApptDate 
+  
+brks <- primary_care$ApptDate 
+p <- ggplot(primary_care, aes(x=ApptDate, y=Checkins)) +geom_line(color="#69b3a2")  + 
+  geom_point(aes(colour = factor(pandemic))) +
+  scale_color_manual(values = c("#69b3a2", "red")) +
+  scale_x_date(labels = lbls,breaks = brks) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust=1, size = 6), 
+        axis.text.y = element_text(size = 6),
+        plot.title = element_text(size = 10),
+        panel.grid.minor = element_blank(),
+        legend.position = "none") +
+  ggtitle("Primary Care Visits Per Month") + ylab(" ") + xlab(" ")
+p
+```
+
+```{r}
+bf1 <- data.frame(x = primary_care$ApptDate[25:52], y = primary_care$Checkins[25:52])
+bf2 <- data.frame(x = c("2021-08-01", "2021-11-01", "2022-01-01", "2022-03-01", "2022-04-01",  "2022-05-01"), y = c(165, 239, 264, 292, 241, 254))
+bf2$x <- as.Date(bf2$x)
+```
+
+```{r  fig.height = 4, fig.width = 10}
+lbls <- paste0(lubridate::year(primary_care$ApptDate), " ",month.abb[month(primary_care$ApptDate)])
+brks <- nursing$ApptDate 
+  
+brks <- primary_care$ApptDate 
+p <- ggplot(primary_care, aes(x=ApptDate, y=Checkins)) +geom_line(color="#69b3a2")  + 
+  geom_point(color = "#69b3a2") +
+  geom_point(data = bf1, aes(x,y), color ="red")+
+  geom_point(data = bf2, aes(x,y), color = "blue") +
+  scale_x_date(labels = lbls,breaks = brks) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust=1, size = 6), 
+        axis.text.y = element_text(size = 6),
+        plot.title = element_text(size = 10),
+        panel.grid.minor = element_blank(),
+        legend.position = "none") +
+  ggtitle("Primary Care Visits Per Month") + ylab(" ") + xlab(" ")
+p
+```
+
+3.  Nursing
+
+```{r fig.height = 4, fig.width = 10}
+lbls <- paste0(lubridate::year(nursing$ApptDate), " ",month.abb[month(nursing$ApptDate)])
+brks <- nursing$ApptDate 
+ggplot(nursing, aes(x=ApptDate, y=numberPTAppts)) +geom_line(color="#69b3a2")  + 
+  geom_point() +
+  scale_x_date(labels = lbls,breaks = brks) +
+  theme(axis.text.x = element_text(angle = 45, vjust=0.5, size = 6),
+  panel.grid.minor = element_blank()) +
+  ggtitle("total visit Nursing Checkin") + ylab(" ") + xlab(" ")
+```
+
+```{r fig.height = 4, fig.width = 10}
+lbls <- paste0(lubridate::year(nursing$ApptDate), " ",month.abb[month(nursing$ApptDate)])
+brks <- nursing$ApptDate 
+ggplot(nursing, aes(x=ApptDate, y=Checkins)) +geom_line(color="#69b3a2")  + 
+  geom_point() +
+  scale_x_date(labels = lbls,breaks = brks) +
+  theme(axis.text.x = element_text(angle = 45, vjust=0.5, size = 4),
+  panel.grid.minor = element_blank()) +
+  ggtitle("total visit Nursing") + ylab(" ") + xlab(" ")
+```
+
+## More EDA
+
+```{r}
+t <- ymd(primary_care$ApptDate )
+primary_care2 <- tibble(
+  date = date(t),
+  month = month(t, label = T),
+  wday = wday(t, label = T),
+  mday = mday(t)
+)
+primary_care2 <- left_join(primary_care2, primary_care, by = c("date" = "ApptDate"))
+primary_care2
+```
+
+```{r}
+t <- ymd(counselling$ApptDate )
+counselling2 <- tibble(
+  date = date(t),
+  month = month(t, label = T),
+  wday = wday(t, label = T),
+  mday = mday(t)
+)
+counselling2 <- left_join(counselling2, counselling, by = c("date" = "ApptDate"))
+counselling2
+```
+
+```{r}
+counselling_wday <- counselling2 %>% 
+  group_by(wday)%>%
+  summarize( count = sum(Checkins, na.rm = TRUE))
+counselling_wday
+```
+
+```{r fig.height = 3, fig.width = 10}
+# weekday 
+p1 <- ggplot(counselling2, aes(x = wday, y = Checkins)) + 
+  geom_boxplot(alpha = 0.6, fill="#69b3a2", color ="#69b3a2" )+ 
+  ggtitle("Counselling") + ylab(" ") + xlab(" ")+
+  theme(plot.title = element_text(size = 10))
+p2 <- ggplot(primary_care2, aes(x = wday, y = Checkins)) + 
+  geom_boxplot(alpha = 0.6, fill="#69b3a2", color ="#69b3a2")+ 
+  ggtitle("Primary Care") + ylab(" ") + xlab(" ")+
+  theme(plot.title = element_text(size = 10))
+p1 + p2
+```
+
+```{r fig.height = 3, fig.width = 10}
+# weekday 
+counselling_wday <- counselling2 %>% 
+  group_by(wday)%>%
+  summarize( count = sum(Checkins, na.rm = TRUE))
+
+primary_care_wday <- primary_care2 %>% 
+  group_by(wday)%>%
+  summarize( count = sum(Checkins, na.rm = TRUE))
+  
+p1 <- ggplot(counselling_wday, aes(x = wday, y = count)) + 
+  geom_col(alpha = 0.6, fill="#69b3a2")+ 
+  ggtitle("Counselling") + ylab(" ") + xlab(" ")+
+  theme(plot.title = element_text(size = 10))
+p2 <- ggplot(primary_care_wday, aes(x = wday, y = count)) + 
+  geom_col(alpha = 0.6, fill="#69b3a2")+ 
+  ggtitle("Primary Care") + ylab(" ") + xlab(" ")+
+  theme(plot.title = element_text(size = 10))
+p1 + p2
+```
+
+```{r fig.height = 3, fig.width = 10}
+
+# Months 
+counselling_month <- counselling2 %>% 
+  group_by(month)%>%
+  summarize( count = sum(Checkins, na.rm = TRUE))
+
+primary_care_month <- primary_care2 %>% 
+  group_by(month)%>%
+  summarize( count = sum(Checkins, na.rm = TRUE))
+  
+p1 <- ggplot(counselling_month, aes(x = month, y = count)) + 
+  geom_col(alpha = 0.6, fill="#69b3a2")+ 
+  ggtitle("counselling") + ylab(" ") + xlab(" ") +
+  theme(plot.title = element_text(size = 10))
+p2 <- ggplot(primary_care_month, aes(x = month, y = count)) + 
+  geom_col(alpha = 0.6, fill="#69b3a2")+ 
+  ggtitle("primary") + ylab(" ") + xlab(" ") +
+  theme(plot.title = element_text(size = 10))
+
+p1 + p2
+```

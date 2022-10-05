@@ -1,0 +1,148 @@
+---
+title: "Anova on Pandemic Effect and Intervention Effect"
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+
+
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(readxl)
+library(ggplot2)
+library(patchwork)
+library(lubridate)
+library(plotly)
+library(car)
+```
+
+```{r}
+df <- read_excel("QI Data Crunching.xlsx") 
+df
+```
+
+```{r}
+counsel <- df %>%
+  filter(DepartmentName == "COUNSELING") %>%
+  select(numvisits_perprovider, pandemic) 
+counsel$pandemic <- as.factor(counsel$pandemic)
+
+primary <- df %>%
+  filter(DepartmentName == "PRIMARY CARE") %>%
+  select(numvisits_perprovider, pandemic) 
+primary$pandemic <- as.factor(primary$pandemic)
+```
+
+
+```{r}
+counsel1 <- df %>%
+  filter(DepartmentName == "COUNSELING") %>%
+  select(Checkins, pandemic) 
+counsel$pandemic <- as.factor(counsel$pandemic)
+
+primary1 <- df %>%
+  filter(DepartmentName == "PRIMARY CARE") %>%
+  select(Checkins, pandemic) 
+primary$pandemic <- as.factor(primary$pandemic)
+```
+
+## Pandemic Effect Anova
+
+### visits per month per provider
+
+```{r}
+#Counselling
+model_counsel <- lm(numvisits_perprovider ~ pandemic, data = counsel)
+anova(model_counsel)
+```
+
+
+```{r}
+#Primary Care
+model2 <- lm(numvisits_perprovider ~ pandemic, data = primary)
+Anova(model2, type=2)
+```
+
+
+### Total Visit
+
+```{r}
+#Counselling
+anova(lm(Checkins ~ pandemic, data = counsel1))
+```
+
+
+```{r}
+#Primary Care
+anova(lm(Checkins ~ pandemic, data = primary1))
+```
+
+
+
+## Anova on Intervention Effect
+
+
+### unblanced 6 vs 46, total visit
+
+```{r}
+counsel2 <- df %>%
+  filter(DepartmentName == "COUNSELING") %>%
+  select(Checkins, intervention) 
+counsel2$intervention <- as.factor(counsel2$intervention)
+
+primary2 <- df %>%
+  filter(DepartmentName == "PRIMARY CARE") %>%
+  select(Checkins, intervention) 
+primary2$intervention <- as.factor(primary2$intervention)
+```
+
+
+
+```{r}
+#Counselling
+Anova(lm(Checkins ~ intervention, data = counsel2), type = 2)
+```
+
+
+```{r}
+#Primary Care
+Anova(lm(Checkins ~ intervention, data = primary2), type = 2)
+```
+
+
+
+###  6 vs 10, total visit
+
+```{r}
+df2 <- read_excel("intervention_counselling.xlsx")
+counsel_in <- df2 %>%
+  filter(Department == "COUNSELING") %>%
+  select(Checkins, numvisits_perprovider, intervention) 
+counsel_in$intervention <- as.factor(counsel_in$intervention)
+
+primary_in <- df2 %>%
+  filter(Department == "PRIMARY CARE") %>%
+  select(Checkins, numvisits_perprovider, intervention) 
+primary_in$intervention <- as.factor(counsel_in$intervention)
+```
+
+
+
+
+```{r}
+#Counselling
+Anova(lm(Checkins ~ intervention, data = counsel_in), type = 2)
+```
+
+
+```{r}
+#Primary Care
+Anova(lm(Checkins ~ intervention, data = primary_in), type = 2)
+```
+
+
+```{r}
+#Chisquare Test Primary Care
+chisq.test(primary_in$intervention , primary_in$Checkins)
+```
+
