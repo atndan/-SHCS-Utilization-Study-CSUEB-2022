@@ -10,3 +10,5 @@ Number of appointments in all outpatient clinics, including student health cente
 <img width="800" alt="image" src="https://user-images.githubusercontent.com/91353356/195479756-a4cf6608-2f10-4335-98b8-83caa67aebf8.png">
 <img width="800" alt="image" src="https://user-images.githubusercontent.com/91353356/195479762-4a88e387-09f9-4159-84c8-b4103f5db544.png">
 <img width="800" alt="image" src="https://user-images.githubusercontent.com/91353356/195479783-22599091-d213-4665-93cf-bc78c20902a4.png">
+<img width="800" alt="image" src="https://user-images.githubusercontent.com/91353356/226083722-074f134b-cf13-4101-998f-caf294aae21b.png">
+<img width="800" alt="image" src="https://user-images.githubusercontent.com/91353356/226083707-f5c70e68-c643-4c32-9bd7-80ee6acfa915.png">
